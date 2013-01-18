@@ -99,9 +99,8 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
 GraphBuilder.prototype.concatenate = function(absolutePath, options) {
     options = options || {};
 
-    var graphBuilder = this;
-    var files = graphBuilder.graph.getChain(absolutePath),
-        concatenatedFile = '';
+    var files = this.graph.getChain(absolutePath),
+        concatenated = '';
 
     // getChain doesn't include the head of the chain, so we add it manually
     // at the end of the array
@@ -109,27 +108,16 @@ GraphBuilder.prototype.concatenate = function(absolutePath, options) {
 
     for (var i = 0, file; i < files.length; i++) {
         file = files[i];
-        if (!graphBuilder.fileCache[file]) {
-            invokeCallback(new Error('The file "' + file + '" is not in the file cache'));
-            return;
+        if (!this.fileCache[file]) {
+            throw new Error('The file "' + file + '" is not in the file cache');
         }
 
-        var fileContents = graphBuilder.fileCache[file].data,
-            end = '*/';
-
-        if (options.removeComments) {
-            // Remove any orphaned comments from the head of the file
-            while (fileContents.indexOf('/*') === 0) {
-                fileContents = fileContents.substr(fileContents.indexOf(end) + end.length);
-            }
-
-            graphBuilder.fileCache[file].data = fileContents;
-        }
-
-        concatenatedFile += fileContents;
+        var fileContents = this.fileCache[file].data;
+        fileContents = options.transform ? options.transform(fileContents) : fileContents;
+        concatenated += fileContents;
     }
 
-    return concatenatedFile;
+    return concatenated;
 };
 
 module.exports = GraphBuilder;
