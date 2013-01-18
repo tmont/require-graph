@@ -85,6 +85,23 @@ describe('graph building and parsing', function() {
         });
     });
 
+    it('should clear file cache', function(done) {
+        var realRoot = path.join(root, 'shouldParse');
+        var builder = new GraphBuilder(realRoot, function() {
+            return realRoot;
+        });
+
+        builder.fileCache.should.eql({});
+
+        builder.buildGraph(function(err) {
+            should.not.exist(err);
+            builder.fileCache.should.not.eql({});
+            builder.clearCache();
+            builder.fileCache.should.eql({});
+            done();
+        });
+    });
+
     describe('with options', function() {
         it('should transform text before caching it', function(done) {
             var realRoot = path.join(root, 'transform');
