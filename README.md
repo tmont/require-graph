@@ -1,6 +1,6 @@
 # require-graph
 
-[![Build Status](https://travis-ci.org/clipboard/require-graph.png)](https://travis-ci.org/clipboard/require-graph)
+[![Build Status](https://travis-ci.org/clipboard/require-graph.png?branch=master)](https://travis-ci.org/clipboard/require-graph)
 
 A tiny library for building/serving dependencies for client-side assets
 (JavaScript, HTML templates, etc.).
