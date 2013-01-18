@@ -42,13 +42,18 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
 			return;
 		}
 
+		if (options.shouldParse && !options.shouldParse(absolutePath)) {
+			fileCallback();
+			return;
+		}
+
 		fs.readFile(absolutePath, 'utf8', function(err, data) {
 			if (err) {
 				fileCallback(err);
 				return;
 			}
 
-			data = options.transformFileContents ? options.transformFileContents(data) : data;
+			data = options.transform ? options.transform(data) : data;
 			graphBuilder.fileCache[absolutePath] = { data: data };
 			var commentBlock = graphBuilder.fileCache[absolutePath].data;
 			var end = commentBlock.indexOf('@@ end */');
@@ -61,22 +66,18 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
 				dependencies = [];
 			for (var i = 0, match; i < lines.length; i++) {
 				if (match = regex.exec(lines[i])) {
-					dependencies.push(match[1]);
+					dependencies.push(match[1].trim());
 				}
 			}
 
 			async.forEachLimit(dependencies, 1, function(relativePath, callback) {
 				var dependencyPath = path.join(
-						graphBuilder.rootLocator(path.extname(relativePath)),
-						relativePath
-					);
+					graphBuilder.rootLocator(path.extname(relativePath)),
+					relativePath
+				);
 
 				graphBuilder.graph.add(absolutePath, dependencyPath);
-				if (!options.shouldParse || options.shouldParse(absolutePath)) {
-					processFile(dependencyPath, callback);
-				} else {
-					callback();
-				}
+				processFile(dependencyPath, callback);
 			}, fileCallback);
 		});
 	}
