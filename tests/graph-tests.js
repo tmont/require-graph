@@ -160,4 +160,37 @@ describe('graph building and parsing', function() {
             });
         });
     });
+
+    it('README example', function(done) {
+        var realRoot = path.join(root, 'readme');
+        var builder = new GraphBuilder(realRoot, function() {
+            return realRoot;
+        });
+
+        builder.buildGraph(function(err) {
+            should.not.exist(err);
+            var chain = builder.graph.getChain(path.join(realRoot, 'a.js'));
+            chain.should.have.length(3);
+            chain[0].should.equal(path.join(realRoot, 'd.js'));
+            chain[1].should.equal(path.join(realRoot, 'c.js'));
+            chain[2].should.equal(path.join(realRoot, 'b.js'));
+
+            chain = builder.graph.getChain(path.join(realRoot, 'b.js'));
+            chain.should.have.length(2);
+            chain[0].should.equal(path.join(realRoot, 'd.js'));
+            chain[1].should.equal(path.join(realRoot, 'c.js'));
+
+            chain = builder.graph.getChain(path.join(realRoot, 'c.js'));
+            chain.should.have.length(1);
+            chain[0].should.equal(path.join(realRoot, 'd.js'));
+
+            chain = builder.graph.getChain(path.join(realRoot, 'd.js'));
+            chain.should.have.length(0);
+
+            var concatenated = builder.concatenate(path.join(realRoot, 'a.js'));
+            var expected = require('fs').readFileSync(path.join(root, 'readme-expected.js'), 'utf8');
+            concatenated.should.equal(expected);
+            done();
+        });
+    });
 });
