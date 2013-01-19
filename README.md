@@ -9,7 +9,7 @@ At [Clipboard](https://clipboard.com/) it is used for concatenating client-side
 JavaScript files and underscore templates at runtime.
 
 ## Installation
-npm install require-graph
+`npm install require-graph`
 
 ## Examples
 Suppose you have some JavaScript files that depend on each other:
