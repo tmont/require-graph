@@ -193,4 +193,18 @@ describe('graph building and parsing', function() {
             done();
         });
     });
+
+    it('should throw if root locator not given to constructor', function(done) {
+        (function() {
+            new GraphBuilder('foo');
+        }).should.throwError('GraphBuilder requires at least one directory and a root locator');
+        done();
+    });
+
+    it('should throw if directory not given to constructor', function(done) {
+        (function() {
+            new GraphBuilder(null, function() {});
+        }).should.throwError('GraphBuilder requires at least one directory and a root locator');
+        done();
+    });
 });

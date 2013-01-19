@@ -5,6 +5,10 @@ var path = require('path'),
     wrench = require('wrench');
 
 function GraphBuilder(directories, rootLocator) {
+    if (!directories || typeof(rootLocator) !== 'function') {
+        throw new Error('GraphBuilder requires at least one directory and a root locator');
+    }
+
     this.directories = Array.isArray(directories) ? directories : [ directories ];
     this.rootLocator = rootLocator;
     this.graph = new DepGraph();
