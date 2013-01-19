@@ -85,6 +85,20 @@ describe('graph building and parsing', function() {
         });
     });
 
+    it('should handle empty comment block', function(done) {
+        var realRoot = path.join(root, 'empty');
+        var builder = new GraphBuilder(realRoot, function() {
+            return realRoot;
+        });
+
+        builder.buildGraph(function(err) {
+            should.not.exist(err);
+            var chain = builder.graph.getChain(path.join(realRoot, 'a.js'));
+            chain.should.have.length(0);
+            done();
+        });
+    });
+
     it('should clear file cache', function(done) {
         var realRoot = path.join(root, 'shouldParse');
         var builder = new GraphBuilder(realRoot, function() {
