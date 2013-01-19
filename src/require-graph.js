@@ -113,7 +113,7 @@ GraphBuilder.prototype.concatenate = function(absolutePath, options) {
         }
 
         var fileContents = this.fileCache[file].data;
-        fileContents = options.transform ? options.transform(fileContents) : fileContents;
+        fileContents = options.transform ? options.transform(fileContents, file) : fileContents;
         concatenated += fileContents;
     }
 

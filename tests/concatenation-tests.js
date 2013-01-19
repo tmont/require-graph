@@ -50,7 +50,8 @@ var foo = \'bar\';';
         builder.buildGraph(function(err) {
             should.not.exist(err);
             var options = {
-                transform: function(contents) {
+                transform: function(contents, file) {
+                    file.should.match(/b\.js$/);
                     return contents.replace('baz', 'giggity');
                 }
             }

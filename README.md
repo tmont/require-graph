@@ -102,7 +102,7 @@ and embarrassing to have in the concatenated file. Whatever can I do?
 
 ```javascript
 var options = {
-    transform: function(contents) {
+    transform: function(contents, fileName) {
         var token = '@@end */';
         var end = contents.indexOf(token);
         return end === -1 ? contents : contents.substring(end + token.length);
