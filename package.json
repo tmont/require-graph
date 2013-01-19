@@ -1,6 +1,6 @@
 {
     "name": "require-graph",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Builds dependency chains for client-side assets",
     "keywords": [ "dependency", "graph" ],
     "directories": {
