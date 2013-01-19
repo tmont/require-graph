@@ -76,7 +76,7 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
 
             async.forEachLimit(dependencies, 1, function(relativePath, callback) {
                 var dependencyPath = path.join(
-                    graphBuilder.rootLocator(path.extname(relativePath)),
+                    graphBuilder.rootLocator(relativePath, absolutePath),
                     relativePath
                 );
 
