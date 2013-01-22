@@ -4,13 +4,12 @@ var path = require('path'),
     async = require('async'),
     wrench = require('wrench');
 
-function GraphBuilder(directories, rootLocator) {
-    if (!directories || typeof(rootLocator) !== 'function') {
-        throw new Error('GraphBuilder requires at least one directory and a root locator');
+function GraphBuilder(directories) {
+    if (!directories) {
+        throw new Error('GraphBuilder requires at least one directory');
     }
 
     this.directories = Array.isArray(directories) ? directories : [ directories ];
-    this.rootLocator = rootLocator;
     this.graph = new DepGraph();
     this.fileCache = {};
 }
@@ -65,18 +64,18 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
                 commentBlock = commentBlock.substring(0, end);
             }
 
-            var regex = /^[\*\s]*\/\/=\s*require\s+(.+)$/i,
+            var requireRegex = /^[\*\s]*\/\/=\s*require\s+(.+)$/i,
                 lines = commentBlock.replace(/\r\n/g, '\n').split('\n'),
                 dependencies = [];
             for (var i = 0, match; i < lines.length; i++) {
-                if (match = regex.exec(lines[i])) {
+                if (match = requireRegex.exec(lines[i])) {
                     dependencies.push(match[1].trim());
                 }
             }
 
             async.forEachLimit(dependencies, 1, function(relativePath, callback) {
                 var dependencyPath = path.join(
-                    graphBuilder.rootLocator(relativePath, absolutePath),
+                    path.dirname(absolutePath),
                     relativePath
                 );
 
@@ -90,7 +89,19 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
         try {
             var files = wrench.readdirSyncRecursive(directory);
             async.forEachLimit(files, 1, function(file, fileCallback) {
-                processFile(path.join(directory, file), fileCallback);
+                var absolutePath = path.join(directory, file);
+                fs.stat(absolutePath, function(err, stat) {
+                    if (err) {
+                        fileCallback(err);
+                        return;
+                    }
+
+                    if (stat.isDirectory()) {
+                        fileCallback();
+                    } else {
+                        processFile(absolutePath, fileCallback);
+                    }
+                });
             }, dirCallback);
         } catch (e) {
             dirCallback(e);

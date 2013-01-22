@@ -38,6 +38,23 @@ describe('graph building and parsing', function() {
         });
     });
 
+    it('should handle nested directories', function(done) {
+        var realRoot = path.join(root, 'nested');
+        var builder = new GraphBuilder(realRoot, function() {
+            return realRoot;
+        });
+
+        builder.buildGraph(function(err) {
+            should.not.exist(err);
+            var chain = builder.graph.getChain(path.join(realRoot, 'a.js'));
+            chain.should.have.length(3);
+            chain[0].should.equal(path.join(realRoot, 'dir/d.js'));
+            chain[1].should.equal(path.join(realRoot, 'dir/c.js'));
+            chain[2].should.equal(path.join(realRoot, 'dir/b.js'));
+            done();
+        });
+    });
+
     it('should handle comment blocks with no @@end', function(done) {
         var realRoot = path.join(root, 'no-end');
         var builder = new GraphBuilder(realRoot, function() {
@@ -208,17 +225,10 @@ describe('graph building and parsing', function() {
         });
     });
 
-    it('should throw if root locator not given to constructor', function(done) {
-        (function() {
-            new GraphBuilder('foo');
-        }).should.throwError('GraphBuilder requires at least one directory and a root locator');
-        done();
-    });
-
     it('should throw if directory not given to constructor', function(done) {
         (function() {
-            new GraphBuilder(null, function() {});
-        }).should.throwError('GraphBuilder requires at least one directory and a root locator');
+            new GraphBuilder();
+        }).should.throwError('GraphBuilder requires at least one directory');
         done();
     });
 });
