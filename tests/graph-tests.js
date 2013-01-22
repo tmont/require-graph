@@ -141,7 +141,8 @@ describe('graph building and parsing', function() {
             });
 
             var options = {
-                transform: function(text) {
+                transform: function(text, fileName) {
+                    should.exist(fileName);
                     return text + 'hello world';
                 }
             };

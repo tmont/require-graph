@@ -56,7 +56,7 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
                 return;
             }
 
-            data = options.transform ? options.transform(data) : data;
+            data = options.transform ? options.transform(data, absolutePath) : data;
             graphBuilder.fileCache[absolutePath] = { data: data };
             var commentBlock = graphBuilder.fileCache[absolutePath].data;
             var end = commentBlock.indexOf('@@ end */');
