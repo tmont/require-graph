@@ -193,13 +193,13 @@ describe('graph building and parsing', function() {
         });
     });
 
-    it('README example', function(done) {
+    it('README example with concurrency', function(done) {
         var realRoot = path.join(root, 'readme');
         var builder = new GraphBuilder(realRoot, function() {
             return realRoot;
         });
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph({ maxConcurrent: 10 }, function(err) {
             should.not.exist(err);
             var chain = builder.graph.getChain(path.join(realRoot, 'a.js'));
             chain.should.have.length(3);

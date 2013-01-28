@@ -73,7 +73,7 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
                 }
             }
 
-            async.forEachLimit(dependencies, 1, function(relativePath, callback) {
+            async.forEachLimit(dependencies, options.maxConcurrent || 10, function(relativePath, callback) {
                 var dependencyPath = path.join(
                     path.dirname(absolutePath),
                     relativePath
@@ -88,7 +88,7 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
     function processDirectory(directory, dirCallback) {
         try {
             var files = wrench.readdirSyncRecursive(directory);
-            async.forEachLimit(files, 1, function(file, fileCallback) {
+            async.forEachLimit(files, options.maxConcurrent || 10, function(file, fileCallback) {
                 var absolutePath = path.join(directory, file);
                 fs.stat(absolutePath, function(err, stat) {
                     if (err) {
@@ -108,7 +108,7 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
         }
     }
 
-    async.forEachLimit(this.directories, 1, processDirectory, callback);
+    async.forEachLimit(this.directories, options.maxConcurrent || 10, processDirectory, callback);
 };
 
 GraphBuilder.prototype.concatenate = function(absolutePath, options) {
