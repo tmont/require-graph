@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/clipboard/require-graph.png?branch=master)](https://travis-ci.org/clipboard/require-graph)
 
 A tiny library for building/serving dependencies for client-side assets
-(JavaScript, HTML templates, etc.).
+(JavaScript, HTML templates, etc.). Licensed under [MIT](./LICENSE).
 
 At [Clipboard](https://clipboard.com/) it is used for concatenating client-side
 JavaScript files and underscore templates at runtime.
