@@ -19,7 +19,7 @@
 
     "dependencies": {
         "dep-graph": "1.1.0",
-        "async": "0.1.22",
+        "async": "0.2.5",
         "wrench": "1.4.4"
     },
 
