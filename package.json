@@ -7,14 +7,14 @@
         "lib": "src"
     },
 
-    "author": "Clipboard, Inc.",
+    "author": "Tommy Montgomery",
     "contributors": [
         { "name": "Ken Perkins" },
         { "name": "Tommy Montgomery" }
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/clipboard/require-graph.git"
+        "url": "https://github.com/tmont/require-graph.git"
     },
 
     "dependencies": {
@@ -34,6 +34,6 @@
 
     "licenses":[{
         "type": "MIT",
-        "url": "https://github.com/clipboard/require-graph/blob/master/LICENSE"
+        "url": "https://github.com/tmont/require-graph/blob/master/LICENSE"
     }]
 }
