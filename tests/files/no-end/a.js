@@ -1,3 +1,2 @@
 /**
- //= require b.js
- */
+ b.js

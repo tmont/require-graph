@@ -1,5 +1,5 @@
-/**
- //= require d.js
- @@end */
+/** @depends
+ * d.js
+ */
 
 messages.push('I am file C!');

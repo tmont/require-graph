@@ -1,18 +1,18 @@
 var messages = [ 'I am file D!' ];
-/**
- //= require d.js
- @@end */
+/** @depends
+ * d.js
+ */
 
 messages.push('I am file C!');
-/**
- //= require c.js
- //= require d.js
- @@end */
+/** @depends
+ * c.js
+ * d.js
+ */
 
 messages.push('I am file B!');
-/**
- //= require b.js
- //= require c.js
- @@end */
+/** @depends
+ * b.js
+ * c.js
+ */
 
 messages.push('I am file A!');

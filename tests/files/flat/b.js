@@ -1,3 +1,3 @@
-/**
- //= require c.js
- @@ end */
+/** @depends
+ * c.js
+ */

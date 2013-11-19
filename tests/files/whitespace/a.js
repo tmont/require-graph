@@ -1,4 +1,4 @@
-/**
- //=     require     b.js
- //=require c.js
- @@end */
+/** @depends
+ *               b.js
+  c.js
+ */

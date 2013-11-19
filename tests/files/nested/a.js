@@ -1,3 +1,3 @@
-/**
- //= require dir/b.js
- @@ end */
+/** @depends
+ * dir/b.js
+ */

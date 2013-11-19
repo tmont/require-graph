@@ -22,8 +22,9 @@ GraphBuilder.prototype.clearCache = function() {
  * Builds the dependency graph
  *
  * @param {Object} [options] Options for the graph builder
- * @param {Function} [options.transformFileContents] Transforms the contents of the file
+ * @param {Function} [options.transform] Transforms the contents of the file
  * after it's been read
+ * @param {Function} [options.shouldParse] Filter for determining which files to parse
  * @param {Function} [callback]
  */
 GraphBuilder.prototype.buildGraph = function(options, callback) {
@@ -38,82 +39,94 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
 
     options = options || {};
 
-    var graphBuilder = this;
-    function processFile(absolutePath, fileCallback) {
-        if (graphBuilder.fileCache[absolutePath]) {
-            fileCallback();
+    var self = this;
+    function processFile(absolutePath, next) {
+        if (self.fileCache[absolutePath]) {
+            next();
             return;
         }
 
         if (options.shouldParse && !options.shouldParse(absolutePath)) {
-            fileCallback();
+            next();
             return;
         }
 
-        fs.readFile(absolutePath, 'utf8', function(err, data) {
+        fs.readFile(absolutePath, 'utf8', function(err, contents) {
             if (err) {
-                fileCallback(err);
+                next(err);
                 return;
             }
 
-            data = options.transform ? options.transform(data, absolutePath) : data;
-            graphBuilder.fileCache[absolutePath] = { data: data };
-            var commentBlock = graphBuilder.fileCache[absolutePath].data;
-            var end = commentBlock.indexOf('@@ end */');
-            if (end !== -1) {
-                commentBlock = commentBlock.substring(0, end);
-            }
+	        if (options.transform) {
+		        contents = options.transform(contents, absolutePath);
+	        }
 
-            var requireRegex = /^[\*\s]*\/\/=\s*require\s+(.+)$/i,
-                lines = commentBlock.replace(/\r\n/g, '\n').split('\n'),
-                dependencies = [];
-            for (var i = 0, match; i < lines.length; i++) {
-                if (match = requireRegex.exec(lines[i])) {
-                    dependencies.push(match[1].trim());
-                }
-            }
+	        self.fileCache[absolutePath] = { data: contents };
 
-            async.forEachLimit(dependencies, options.maxConcurrent || 10, function(relativePath, callback) {
-                var dependencyPath = path.join(
-                    path.dirname(absolutePath),
-                    relativePath
-                );
+	        if (/^\s*\/\*\* @depends/.test(contents)) {
+		        var end = contents.indexOf('*/');
+		        if (end !== -1) {
+			        var commentBlock = contents.substring(0, end);
+			        if (options.removeHeader) {
+				        self.fileCache[absolutePath].data = contents.substring(end);
+			        }
 
-                graphBuilder.graph.add(absolutePath, dependencyPath);
-                processFile(dependencyPath, callback);
-            }, fileCallback);
+			        var lines = commentBlock.replace(/\r\n/g, '\n').split('\n'),
+				        dependencies = [];
+			        for (var i = 1, match; i < lines.length; i++) {
+				        if (match = /^[*\s]*([^*\s].*)$/.exec(lines[i])) {
+					        var filename = match[1].trim();
+					        if (filename) {
+					            dependencies.push(filename);
+					        }
+				        }
+			        }
+
+			        async.eachLimit(dependencies, options.maxConcurrent || 10, function(relativePath, next) {
+				        var dependencyPath = path.join(
+					        path.dirname(absolutePath),
+					        relativePath
+				        );
+
+				        self.graph.add(absolutePath, dependencyPath);
+				        processFile(dependencyPath, next);
+			        }, next);
+		        } else {
+			        next();
+		        }
+	        } else {
+		        next();
+	        }
         });
     }
 
-    function processDirectory(directory, dirCallback) {
+    function processDirectory(directory, next) {
         try {
             var files = wrench.readdirSyncRecursive(directory);
-            async.forEachLimit(files, options.maxConcurrent || 10, function(file, fileCallback) {
+            async.forEachLimit(files, options.maxConcurrent || 10, function(file, next) {
                 var absolutePath = path.join(directory, file);
                 fs.stat(absolutePath, function(err, stat) {
                     if (err) {
-                        fileCallback(err);
+                        next(err);
                         return;
                     }
 
                     if (stat.isDirectory()) {
-                        fileCallback();
+                        next();
                     } else {
-                        processFile(absolutePath, fileCallback);
+                        processFile(absolutePath, next);
                     }
                 });
-            }, dirCallback);
+            }, next);
         } catch (e) {
-            dirCallback(e);
+            next(e);
         }
     }
 
     async.forEachLimit(this.directories, options.maxConcurrent || 10, processDirectory, callback);
 };
 
-GraphBuilder.prototype.concatenate = function(absolutePath, options) {
-    options = options || {};
-
+GraphBuilder.prototype.concatenate = function(absolutePath) {
     var files = this.graph.getChain(absolutePath),
         concatenated = '';
 
@@ -127,12 +140,14 @@ GraphBuilder.prototype.concatenate = function(absolutePath, options) {
             throw new Error('The file "' + file + '" is not in the file cache');
         }
 
-        var fileContents = this.fileCache[file].data;
-        fileContents = options.transform ? options.transform(fileContents, file) : fileContents;
-        concatenated += fileContents;
+        concatenated += this.fileCache[file].data;
     }
 
     return concatenated;
+};
+
+GraphBuilder.prototype.getFiles = function(absolutePath) {
+	return this.graph.getChain(absolutePath);
 };
 
 module.exports = GraphBuilder;

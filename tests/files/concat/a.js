@@ -1,5 +1,5 @@
-/**
- //= require b.js
- @@end */
+/** @depends
+ * b.js
+ */
 
 var foo = 'bar';

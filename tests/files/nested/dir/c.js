@@ -1,3 +1,3 @@
-/**
- //= require ../dir/d.js
- @@ end */
+/** @depends
+ * ../dir/d.js
+ */
