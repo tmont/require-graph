@@ -93,9 +93,45 @@ builder.buildGraph(function(err) {
 });
 ```
 
+## `buildGraph()` Options
+Remove require-graph specific headers (the `/** @depends...*/` blocks):
+
+```javascript
+var options = {
+  removeHeaders: true
+};
+build.buildGraph(options, callback);
+```
+
+Do something to the file's contents:
+
+```javascript
+var options = {
+  transform: function(contents, filename) {
+    var stat = fs.statSync(filename);
+    return '// last modified on ' + stat.mtime + '\n' + contents;
+  }
+};
+build.buildGraph(options, callback);
+```
+
+Control which files are parsed:
+
+```javascript
+var options = {
+  shouldParse: function(filename) {
+    // only parse javascript files
+    return /\.js$/.test(filename);
+  }
+};
+build.buildGraph(options, callback);
+```
+
+
 ## Development
 ```bash
 git clone git@github.com:tmont/require-graph.git
 cd require-graph
 npm install
 npm test
+```

@@ -25,6 +25,7 @@ GraphBuilder.prototype.clearCache = function() {
  * @param {Function} [options.transform] Transforms the contents of the file
  * after it's been read
  * @param {Function} [options.shouldParse] Filter for determining which files to parse
+ * @param {Boolean} [options.removeHeaders] Remove require-graph comment headers from all files
  * @param {Function} [callback]
  */
 GraphBuilder.prototype.buildGraph = function(options, callback) {
@@ -67,7 +68,7 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
 		        var end = contents.indexOf('*/');
 		        if (end !== -1) {
 			        var commentBlock = contents.substring(0, end);
-			        if (options.removeHeader) {
+			        if (options.removeHeaders) {
 				        self.fileCache[absolutePath].data = contents.substring(end + 2);
 			        }
 

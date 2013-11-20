@@ -149,11 +149,11 @@ describe('graph building and parsing', function() {
         });
 
 	    it('should remove headers', function(done) {
-		    var realRoot = path.join(root, 'removeHeader');
+		    var realRoot = path.join(root, 'removeHeaders');
 		    var builder = new GraphBuilder(realRoot);
 
 		    var options = {
-			    removeHeader: true
+			    removeHeaders: true
 		    };
 
 		    builder.buildGraph(options, function(err) {
