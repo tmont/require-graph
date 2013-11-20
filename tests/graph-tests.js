@@ -148,6 +148,28 @@ describe('graph building and parsing', function() {
             });
         });
 
+	    it('should remove headers', function(done) {
+		    var realRoot = path.join(root, 'removeHeader');
+		    var builder = new GraphBuilder(realRoot);
+
+		    var options = {
+			    removeHeader: true
+		    };
+
+		    builder.buildGraph(options, function(err) {
+			    should.not.exist(err);
+			    var files = builder.getFiles(path.join(realRoot, 'a.js'));
+			    files.should.have.length(1);
+			    files[0].should.equal(path.join(realRoot, 'b.js'));
+
+			    builder.fileCache.should.have.property(path.join(realRoot, 'a.js'));
+			    var a = builder.fileCache[path.join(realRoot, 'a.js')];
+			    a.should.have.property('data', '\nvar foo;');
+
+			    done();
+		    });
+	    });
+
         it('should not parse certain files', function(done) {
             var realRoot = path.join(root, 'shouldParse');
             var builder = new GraphBuilder(realRoot);

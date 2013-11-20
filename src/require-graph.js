@@ -68,7 +68,7 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
 		        if (end !== -1) {
 			        var commentBlock = contents.substring(0, end);
 			        if (options.removeHeader) {
-				        self.fileCache[absolutePath].data = contents.substring(end);
+				        self.fileCache[absolutePath].data = contents.substring(end + 2);
 			        }
 
 			        var lines = commentBlock.replace(/\r\n/g, '\n').split('\n'),
