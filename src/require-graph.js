@@ -138,7 +138,10 @@ GraphBuilder.prototype.concatenate = function(absolutePath) {
     for (var i = 0, file; i < files.length; i++) {
         file = files[i];
         if (!this.fileCache[file]) {
-            throw new Error('The file "' + file + '" is not in the file cache');
+            throw new Error(
+	            'The file "' + file + '" is not in the file cache (attempting to ' +
+	            'concatenate "' + absolutePath + '")'
+            );
         }
 
         concatenated += this.fileCache[file].data;

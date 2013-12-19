@@ -42,6 +42,6 @@ var foo = \'bar\';';
 
         (function() {
             builder.concatenate('foo');
-        }).should.throwError('The file "foo" is not in the file cache');
+        }).should.throwError('The file "foo" is not in the file cache (attempting to concatenate "foo")');
     });
 });
