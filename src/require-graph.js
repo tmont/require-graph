@@ -52,59 +52,72 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
             return;
         }
 
-        fs.readFile(absolutePath, 'utf8', function(err, contents) {
-            if (err) {
-                next(err);
-                return;
-            }
+	    fs.readFile(absolutePath, 'utf8', function(err, contents) {
+		    if (err) {
+			    next(err);
+			    return;
+		    }
 
-	        if (options.transform) {
-		        contents = options.transform(contents, absolutePath);
-	        }
+		    if (options.transform) {
+			    contents = options.transform(contents, absolutePath);
+		    }
 
-	        self.fileCache[absolutePath] = { data: contents };
+		    self.fileCache[absolutePath] = { data: contents };
 
-	        if (/^\s*\/\*\* @depends/.test(contents)) {
-		        var end = contents.indexOf('*/');
-		        if (end !== -1) {
-			        var commentBlock = contents.substring(0, end);
-			        if (options.removeHeaders) {
-				        self.fileCache[absolutePath].data = contents.substring(end + 2);
-			        }
+		    if (!/^\s*\/\*\* @depends/.test(contents)) {
+			    next();
+			    return;
+		    }
 
-			        var lines = commentBlock.replace(/\r\n/g, '\n').split('\n'),
-				        dependencies = [];
-			        for (var i = 1, match; i < lines.length; i++) {
-				        if (match = /^[*\s]*([^*\s].*)$/.exec(lines[i])) {
-					        var filename = match[1].trim();
-					        if (filename) {
-					            dependencies.push(filename);
-					        }
-				        }
-			        }
+		    var end = contents.indexOf('*/');
+		    if (end === -1) {
+			    next();
+			    return;
+		    }
 
-			        async.eachLimit(dependencies, options.maxConcurrent || 10, function(relativePath, next) {
-				        var dependencyPath = path.join(
-					        path.dirname(absolutePath),
-					        relativePath
-				        );
+		    var commentBlock = contents.substring(0, end);
+		    if (options.removeHeaders) {
+			    self.fileCache[absolutePath].data = contents.substring(end + 2);
+		    }
 
-				        self.graph.add(absolutePath, dependencyPath);
-				        processFile(dependencyPath, next);
-			        }, next);
-		        } else {
-			        next();
-		        }
-	        } else {
-		        next();
-	        }
-        });
+		    var lines = commentBlock.replace(/\r\n/g, '\n').split('\n'),
+			    dependencies = [];
+		    for (var i = 1, match; i < lines.length; i++) {
+			    if (match = /^[*\s]*([^*\s].*)$/.exec(lines[i])) {
+				    var filename = match[1].trim();
+				    if (filename) {
+					    dependencies.push(filename);
+				    }
+			    }
+		    }
+
+		    async.eachLimit(dependencies, options.maxConcurrent || 10, function(relativePath, next) {
+			    var dependencyPath = path.join(
+				    path.dirname(absolutePath),
+				    relativePath
+			    );
+
+			    fs.stat(dependencyPath, function(err, stat) {
+				    if (err) {
+					    next(err);
+					    return;
+				    }
+
+				    if (stat.isDirectory()) {
+					    processDirectory(dependencyPath, next, absolutePath);
+				    } else {
+					    self.graph.add(absolutePath, dependencyPath);
+					    processFile(dependencyPath, next);
+				    }
+			    });
+		    }, next);
+	    });
     }
 
-    function processDirectory(directory, next) {
+    function processDirectory(directory, next, declaringFile) {
         try {
             var files = wrench.readdirSyncRecursive(directory);
-            async.forEachLimit(files, options.maxConcurrent || 10, function(file, next) {
+            async.eachLimit(files, options.maxConcurrent || 10, function(file, next) {
                 var absolutePath = path.join(directory, file);
                 fs.stat(absolutePath, function(err, stat) {
                     if (err) {
@@ -115,6 +128,9 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
                     if (stat.isDirectory()) {
                         next();
                     } else {
+	                    if (declaringFile) {
+		                    self.graph.add(declaringFile, absolutePath);
+	                    }
                         processFile(absolutePath, next);
                     }
                 });
@@ -124,7 +140,7 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
         }
     }
 
-    async.forEachLimit(this.directories, options.maxConcurrent || 10, processDirectory, callback);
+    async.eachLimit(this.directories, options.maxConcurrent || 10, processDirectory, callback);
 };
 
 GraphBuilder.prototype.concatenate = function(absolutePath) {

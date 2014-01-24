@@ -116,6 +116,22 @@ describe('graph building and parsing', function() {
         });
     });
 
+	it('should handle directory path as dependency', function(done) {
+		var realRoot = path.join(root, 'dir');
+		var builder = new GraphBuilder(realRoot);
+
+		builder.buildGraph(function(err) {
+			should.not.exist(err);
+			var files = builder.getFiles(path.join(realRoot, 'file.js'));
+			files.should.have.length(4);
+			files[0].should.equal(path.join(realRoot, 'dir/1.js'));
+			files[1].should.equal(path.join(realRoot, 'dir/2.js'));
+			files[2].should.equal(path.join(realRoot, 'dir/another/3.js'));
+			files[3].should.equal(path.join(realRoot, 'dir/another/onemore/4.js'));
+			done();
+		});
+	});
+
     describe('with options', function() {
         it('should transform text before caching it', function(done) {
             var realRoot = path.join(root, 'transform');
