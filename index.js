@@ -93,7 +93,7 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
 				}
 			}
 
-			async.eachLimit(dependencies, options.maxConcurrent || 10, function(relativePath, next) {
+			async.eachSeries(dependencies, function(relativePath, next) {
 				var dependencyPath = path.join(
 					path.dirname(absolutePath),
 					relativePath
