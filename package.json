@@ -3,9 +3,10 @@
     "version": "1.0.2",
     "description": "Builds dependency chains for client-side assets",
     "keywords": [ "dependency", "graph" ],
-    "directories": {
-        "lib": "src"
-    },
+    "files": [
+        "index.js",
+	    "LICENSE"
+    ],
 
     "author": "Tommy Montgomery",
     "contributors": [
