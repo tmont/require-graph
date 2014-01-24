@@ -93,6 +93,18 @@ builder.buildGraph(function(err) {
 });
 ```
 
+### Directories as dependencies
+You can also specify a relative directory as a dependency, in which
+case all files in that directory (recursively) will be set as
+dependencies. For example:
+
+```
+/** @depends
+ * this/file.js
+ * that/directory
+ */
+```
+
 ## `buildGraph()` Options
 Remove require-graph specific headers (the `/** @depends...*/` blocks):
 
