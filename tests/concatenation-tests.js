@@ -7,10 +7,11 @@ describe('concatenation', function() {
     it('should concatenate dependencies', function(done) {
         var realRoot = path.join(root, 'concat');
         var builder = new GraphBuilder(realRoot);
+	    var file = path.join(realRoot, 'a.js');
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph(file, function(err, files) {
             should.not.exist(err);
-            var concatenated = builder.concatenate(path.join(realRoot, 'a.js'));
+            var concatenated = builder.concatenate(file);
             var expected =
 'var baz = \'bat\';\n\
 /** @depends\n\
@@ -27,10 +28,11 @@ var foo = \'bar\';';
     it('should concatenate nothing for file with no dependencies', function(done) {
         var realRoot = path.join(root, 'concat');
         var builder = new GraphBuilder(realRoot);
+	    var file = path.join(realRoot, 'b.js');
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph(file, function(err, files) {
             should.not.exist(err);
-            var concatenated = builder.concatenate(path.join(realRoot, 'b.js'));
+            var concatenated = builder.concatenate(file);
             var expected ='var baz = \'bat\';\n';
             concatenated.should.equal(expected);
             done();
@@ -38,7 +40,7 @@ var foo = \'bar\';';
     });
 
     it('should throw if file does not exist in the cache', function() {
-        var builder = new GraphBuilder('foo');
+        var builder = new GraphBuilder();
 
         (function() {
             builder.concatenate('foo');

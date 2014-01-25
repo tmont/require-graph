@@ -57,39 +57,42 @@ After defining all the dependencies, you can concatenate them at runtime
 (or build time, or whenever-you-want-time):
 
 ```javascript
-var GraphBuilder = require('require-graph');
-var builder = new GraphBuilder('/path/to/js/files');
-builder.buildGraph(function(err) {
-    if (err) {
-        console.log('oh god why', err);
-        return;
-    }
+var GraphBuilder = require('require-graph'),
+  path = require('path'),
+  builder = new GraphBuilder(),
+  root = '/path/to/files';
 
-    console.log(builder.getFiles(path.join(root, 'a.js'))); // [ 'd.js', 'c.js', 'b.js' ]
-    console.log(builder.getFiles(path.join(root, 'b.js'))); // [ 'd.js', 'c.js' ]
-    console.log(builder.getFiles(path.join(root, 'c.js'))); // [ 'd.js' ]
-    console.log(builder.getFiles(path.join(root, 'd.js'))); // []
+builder.buildGraph(path.join(root, 'a.js'), function(err, dependencies) {
+  if (err) {
+    console.log('oh god why', err);
+    return;
+  }
 
-    console.log(builder.concatenate(path.join(root, 'a.js')));
+  console.log(builder.getFiles(path.join(root, 'a.js'))); // [ 'd.js', 'c.js', 'b.js' ]
+  console.log(builder.getFiles(path.join(root, 'b.js'))); // [ 'd.js', 'c.js' ]
+  console.log(builder.getFiles(path.join(root, 'c.js'))); // [ 'd.js' ]
+  console.log(builder.getFiles(path.join(root, 'd.js'))); // []
 
-    // var messages = [ 'I am file D!' ];
-    // /** @depends
-    //  * d.js
-    //  */
-    //
-    // messages.push('I am file C!');
-    // /** @depends
-    //  * c.js
-    //  * d.js
-    //  */
-    //
-    // messages.push('I am file B!');
-    // /**
-    //  * b.js
-    //  * c.js
-    //  */
-    //
-    // messages.push('I am file A!');
+  console.log(builder.concatenate(path.join(root, 'a.js')));
+
+  // var messages = [ 'I am file D!' ];
+  // /** @depends
+  //  * d.js
+  //  */
+  //
+  // messages.push('I am file C!');
+  // /** @depends
+  //  * c.js
+  //  * d.js
+  //  */
+  //
+  // messages.push('I am file B!');
+  // /**
+  //  * b.js
+  //  * c.js
+  //  */
+  //
+  // messages.push('I am file A!');
 });
 ```
 

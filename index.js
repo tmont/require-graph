@@ -4,12 +4,7 @@ var path = require('path'),
 	async = require('async'),
 	wrench = require('wrench');
 
-function GraphBuilder(directories) {
-	if (!directories) {
-		throw new Error('GraphBuilder requires at least one directory');
-	}
-
-	this.directories = Array.isArray(directories) ? directories : [ directories ];
+function GraphBuilder() {
 	this.graph = new DepGraph();
 	this.fileCache = {};
 }
@@ -19,8 +14,9 @@ GraphBuilder.prototype.clearCache = function() {
 };
 
 /**
- * Builds the dependency graph
+ * Builds the dependency graph for a file
  *
+ * @param {String} file File to build dependency graph for
  * @param {Object} [options] Options for the graph builder
  * @param {Function} [options.transform] Transforms the contents of the file
  * after it's been read
@@ -28,15 +24,14 @@ GraphBuilder.prototype.clearCache = function() {
  * @param {Boolean} [options.removeHeaders] Remove require-graph comment headers from all files
  * @param {Function} [callback]
  */
-GraphBuilder.prototype.buildGraph = function(options, callback) {
+GraphBuilder.prototype.buildGraph = function(file, options, callback) {
 	if (typeof(options) === 'function') {
 		callback = options;
 		options = null;
 	}
 
 	if (typeof(callback) !== 'function') {
-		callback = function() {
-		};
+		callback = function() {};
 	}
 
 	options = options || {};
@@ -142,7 +137,9 @@ GraphBuilder.prototype.buildGraph = function(options, callback) {
 		}
 	}
 
-	async.eachLimit(this.directories, options.maxConcurrent || 10, processDirectory, callback);
+	processFile(file, function(err) {
+		callback(err, self.graph.getChain(file));
+	});
 };
 
 GraphBuilder.prototype.concatenate = function(absolutePath) {

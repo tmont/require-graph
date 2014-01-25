@@ -6,11 +6,11 @@ var should = require('should'),
 describe('graph building and parsing', function() {
     it('should handle chained dependencies', function(done) {
         var realRoot = path.join(root, 'flat');
-        var builder = new GraphBuilder(realRoot);
+        var builder = new GraphBuilder();
+		var file = path.join(realRoot, 'a.js');
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph(file, function(err, files) {
             should.not.exist(err);
-            var files = builder.getFiles(path.join(realRoot, 'a.js'));
             files.should.have.length(3);
             files[0].should.equal(path.join(realRoot, 'd.js'));
             files[1].should.equal(path.join(realRoot, 'c.js'));
@@ -21,11 +21,11 @@ describe('graph building and parsing', function() {
 
     it('should handle multiple dependencies', function(done) {
         var realRoot = path.join(root, 'multiple');
-        var builder = new GraphBuilder(realRoot);
+        var builder = new GraphBuilder();
+	    var file = path.join(realRoot, 'a.js');
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph(file, function(err, files) {
             should.not.exist(err);
-            var files = builder.getFiles(path.join(realRoot, 'a.js'));
             files.should.have.length(3);
             files[0].should.equal(path.join(realRoot, 'd.js'));
             files[1].should.equal(path.join(realRoot, 'c.js'));
@@ -36,11 +36,11 @@ describe('graph building and parsing', function() {
 
     it('should handle nested directories', function(done) {
         var realRoot = path.join(root, 'nested');
-        var builder = new GraphBuilder(realRoot);
+        var builder = new GraphBuilder();
+	    var file = path.join(realRoot, 'a.js');
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph(file, function(err, files) {
             should.not.exist(err);
-            var files = builder.getFiles(path.join(realRoot, 'a.js'));
             files.should.have.length(3);
             files[0].should.equal(path.join(realRoot, 'dir/d.js'));
             files[1].should.equal(path.join(realRoot, 'dir/c.js'));
@@ -51,11 +51,11 @@ describe('graph building and parsing', function() {
 
     it('should handle comment blocks with no closing comment', function(done) {
         var realRoot = path.join(root, 'no-end');
-        var builder = new GraphBuilder(realRoot);
+        var builder = new GraphBuilder();
+	    var file = path.join(realRoot, 'a.js');
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph(file, function(err, files) {
             should.not.exist(err);
-            var files = builder.getFiles(path.join(realRoot, 'a.js'));
             files.should.have.length(0);
             done();
         });
@@ -64,10 +64,10 @@ describe('graph building and parsing', function() {
     it('should handle goofy whitespace', function(done) {
         var realRoot = path.join(root, 'whitespace');
         var builder = new GraphBuilder(realRoot);
+	    var file = path.join(realRoot, 'a.js');
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph(file, function(err, files) {
             should.not.exist(err);
-            var files = builder.getFiles(path.join(realRoot, 'a.js'));
             files.should.have.length(2);
             files[0].should.equal(path.join(realRoot, 'b.js'));
             files[1].should.equal(path.join(realRoot, 'c.js'));
@@ -77,11 +77,11 @@ describe('graph building and parsing', function() {
 
     it('should handle line breaks between dependencies', function(done) {
         var realRoot = path.join(root, 'linebreaks');
-        var builder = new GraphBuilder(realRoot);
+        var builder = new GraphBuilder();
+	    var file = path.join(realRoot, 'a.js');
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph(file, function(err, files) {
             should.not.exist(err);
-            var files = builder.getFiles(path.join(realRoot, 'a.js'));
             files.should.have.length(2);
             files[0].should.equal(path.join(realRoot, 'b.js'));
             files[1].should.equal(path.join(realRoot, 'c.js'));
@@ -91,11 +91,11 @@ describe('graph building and parsing', function() {
 
     it('should handle empty comment block', function(done) {
         var realRoot = path.join(root, 'empty');
-        var builder = new GraphBuilder(realRoot);
+        var builder = new GraphBuilder();
+	    var file = path.join(realRoot, 'a.js');
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph(file, function(err, files) {
             should.not.exist(err);
-            var files = builder.getFiles(path.join(realRoot, 'a.js'));
             files.should.have.length(0);
             done();
         });
@@ -103,11 +103,12 @@ describe('graph building and parsing', function() {
 
     it('should clear file cache', function(done) {
         var realRoot = path.join(root, 'shouldParse');
-        var builder = new GraphBuilder(realRoot);
+        var builder = new GraphBuilder();
+	    var file = path.join(realRoot, 'a.js');
 
         builder.fileCache.should.eql({});
 
-        builder.buildGraph(function(err) {
+        builder.buildGraph(file, function(err) {
             should.not.exist(err);
             builder.fileCache.should.not.eql({});
             builder.clearCache();
@@ -118,11 +119,11 @@ describe('graph building and parsing', function() {
 
 	it('should handle directory path as dependency', function(done) {
 		var realRoot = path.join(root, 'dir');
-		var builder = new GraphBuilder(realRoot);
+		var builder = new GraphBuilder();
+		var file = path.join(realRoot, 'file.js');
 
-		builder.buildGraph(function(err) {
+		builder.buildGraph(file, function(err, files) {
 			should.not.exist(err);
-			var files = builder.getFiles(path.join(realRoot, 'file.js'));
 			files.should.have.length(4);
 			files[0].should.equal(path.join(realRoot, 'dir/1.js'));
 			files[1].should.equal(path.join(realRoot, 'dir/2.js'));
@@ -136,6 +137,7 @@ describe('graph building and parsing', function() {
         it('should transform text before caching it', function(done) {
             var realRoot = path.join(root, 'transform');
             var builder = new GraphBuilder(realRoot);
+	        var file = path.join(realRoot, 'a.js');
 
             var options = {
                 transform: function(text, fileName) {
@@ -144,9 +146,8 @@ describe('graph building and parsing', function() {
                 }
             };
 
-            builder.buildGraph(options, function(err) {
+            builder.buildGraph(file, options, function(err, files) {
                 should.not.exist(err);
-                var files = builder.getFiles(path.join(realRoot, 'a.js'));
                 files.should.have.length(1);
                 files[0].should.equal(path.join(realRoot, 'b.js'));
 
@@ -167,14 +168,14 @@ describe('graph building and parsing', function() {
 	    it('should remove headers', function(done) {
 		    var realRoot = path.join(root, 'removeHeaders');
 		    var builder = new GraphBuilder(realRoot);
+		    var file = path.join(realRoot, 'a.js');
 
 		    var options = {
 			    removeHeaders: true
 		    };
 
-		    builder.buildGraph(options, function(err) {
+		    builder.buildGraph(file, options, function(err, files) {
 			    should.not.exist(err);
-			    var files = builder.getFiles(path.join(realRoot, 'a.js'));
 			    files.should.have.length(1);
 			    files[0].should.equal(path.join(realRoot, 'b.js'));
 
@@ -189,6 +190,7 @@ describe('graph building and parsing', function() {
         it('should not parse certain files', function(done) {
             var realRoot = path.join(root, 'shouldParse');
             var builder = new GraphBuilder(realRoot);
+	        var file = path.join(realRoot, 'a.js');
 
             var options = {
                 shouldParse: function(fileName) {
@@ -196,9 +198,8 @@ describe('graph building and parsing', function() {
                 }
             };
 
-            builder.buildGraph(options, function(err) {
+            builder.buildGraph(file, options, function(err, files) {
                 should.not.exist(err);
-                var files = builder.getFiles(path.join(realRoot, 'a.js'));
                 files.should.have.length(1);
                 files[0].should.equal(path.join(realRoot, 'b.js'));
 
@@ -212,11 +213,11 @@ describe('graph building and parsing', function() {
 
     it('README example with concurrency', function(done) {
         var realRoot = path.join(root, 'readme');
-        var builder = new GraphBuilder(realRoot);
+        var builder = new GraphBuilder();
+	    var file = path.join(realRoot, 'a.js');
 
-        builder.buildGraph({ maxConcurrent: 10 }, function(err) {
+        builder.buildGraph(file, { maxConcurrent: 10 }, function(err, files) {
             should.not.exist(err);
-            var files = builder.getFiles(path.join(realRoot, 'a.js'));
             files.should.have.length(3);
             files[0].should.equal(path.join(realRoot, 'd.js'));
             files[1].should.equal(path.join(realRoot, 'c.js'));
@@ -239,12 +240,5 @@ describe('graph building and parsing', function() {
             concatenated.should.equal(expected);
             done();
         });
-    });
-
-    it('should throw if directory not given to constructor', function(done) {
-        (function() {
-            new GraphBuilder();
-        }).should.throwError('GraphBuilder requires at least one directory');
-        done();
     });
 });
